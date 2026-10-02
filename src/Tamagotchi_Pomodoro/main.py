@@ -3,7 +3,8 @@ import pygame
 from . import config
 from .assets import load_sprites
 from .character import Character
-from .timer import Phase
+from .timer import Phase, PomodoroTimer
+from .ui import Interface
 
 def main():
     pygame.init()
@@ -12,8 +13,9 @@ def main():
     clock = pygame.time.Clock()
 
     sprites = load_sprites()
+    timer = PomodoroTimer()
     character = Character()
-    phase = Phase.FOCUS
+    ui = Interface()
 
     running = True
     while running:
@@ -24,19 +26,20 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    character.celebrate()
-                elif event.key == pygame.K_b:
-                    if phase == Phase.FOCUS:
-                        phase = Phase.BREAK
-                    else:
-                        phase = Phase.FOCUS
+                    timer.toggle()
+                elif event.key == pygame.K_r:
+                    timer.reset()
+                elif event.key == pygame.K_s:
+                    timer.skip()
 
-        character.update(dt, phase)
+        finished = timer.update(dt)
+        if finished == Phase.FOCUS:
+            character.celebrate()
 
-        screen.fill(config.BACKGROUND_COLOR)
-        image = sprites[character.mood][character.frame]
-        rect = image.get_rect(center=(config.WINDOW_WIDTH // 2, config.WINDOW_HEIGHT // 2))
-        screen.blit(image, rect)
+        character.update(dt, timer.phase)
+
+        sprite = sprites[character.mood][character.frame]
+        ui.draw(screen, timer, sprite)
         pygame.display.flip()
 
     pygame.quit()
