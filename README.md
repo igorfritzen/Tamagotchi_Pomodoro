@@ -24,9 +24,10 @@ O projeto está **em desenvolvimento**. O que já funciona e o que vem a seguir:
 - [x] Carregamento e ampliação dos sprites em pixel art
 - [x] Janela Pygame com o slime animado
 - [x] Testes automatizados da lógica (15 testes)
-- [ ] Ligar o timer à interface (mostrar o tempo e reagir ao fim de cada fase)
-- [ ] Botões e atalhos (iniciar, pausar, pular, resetar)
-- [ ] Contador de ciclos na tela
+- [x] Timer ligado à interface (tempo, fase e ciclos na tela; o slime comemora ao fim de cada foco)
+- [x] Atalhos de teclado (iniciar/pausar, resetar, pular fase)
+- [ ] Botões clicáveis com o mouse
+- [ ] Sons e barra de energia
 
 ---
 
@@ -49,6 +50,7 @@ O projeto está **em desenvolvimento**. O que já funciona e o que vem a seguir:
   - [Módulos](#módulos)
   - [API de `timer.py`](#api-de-timerpy)
   - [API de `character.py`](#api-de-characterpy)
+  - [API de `ui.py`](#api-de-uipy)
   - [Exemplo de uso sem interface](#exemplo-de-uso-sem-interface)
 - [Instalação e execução](#instalação-e-execução)
 - [Controles](#controles)
@@ -66,7 +68,7 @@ O projeto está **em desenvolvimento**. O que já funciona e o que vem a seguir:
 
 ### O personagem
 
-O slime é feito de **sprites em pixel art de 32×32 pixels**, com **3 humores** e **2 frames** por humor. Os sprites são ampliados com *nearest-neighbor* (`pygame.transform.scale`), o que mantém os pixels nítidos.
+O slime é feito de **sprites em pixel art de 32×32 pixels com fundo transparente**, com **3 humores** e **2 frames** por humor. Os sprites são ampliados com *nearest-neighbor* (`pygame.transform.scale`), o que mantém os pixels nítidos.
 
 | Humor | Quando aparece | Arquivos |
 | --- | --- | --- |
@@ -121,7 +123,8 @@ O projeto separa **lógica** de **apresentação**. `timer.py` e `character.py` 
 | `timer.py` | Lógica pura do relógio: fases, contagem, ciclos e formatação do tempo. |
 | `character.py` | Lógica pura do personagem: humor, comemoração e frame da animação. |
 | `assets.py` | Carrega os sprites do disco e os amplia. |
-| `main.py` | Janela Pygame, loop principal, eventos e desenho na tela. |
+| `ui.py` | Desenha a tela: fase, slime, tempo, ciclos e ajuda de teclas. Só **lê** o estado, não altera a lógica. |
+| `main.py` | Janela Pygame, loop principal, teclado e ligação entre timer, personagem e interface. |
 
 A dependência vai em um só sentido: `character` conhece o `timer` (usa `Phase`), mas o `timer` não conhece o `character`.
 
@@ -163,6 +166,17 @@ A dependência vai em um só sentido: `character` conhece o `timer` (usa `Phase`
 | --- | --- |
 | `mood` | humor atual (`Mood`) |
 | `frame` | índice do frame da animação (`0` ou `1`) |
+
+### API de `ui.py`
+
+**`Interface`**
+
+| Método | Efeito |
+| --- | --- |
+| `draw(screen, timer, sprite)` | desenha um quadro completo: fase, slime, tempo, ciclos e ajuda de teclas |
+| `draw_text(screen, text, font, center)` | desenha um texto centralizado em um ponto |
+
+A `Interface` apenas lê o `timer`; quem escolhe o sprite certo (pelo humor e frame do personagem) é o `main.py`.
 
 ### Exemplo de uso sem interface
 
@@ -207,13 +221,14 @@ python -m Tamagotchi_Pomodoro.main
 
 ## Controles
 
-Atalhos da versão atual, usados apenas para demonstrar os humores. Serão substituídos pelos controles do timer.
-
-| Ação | Entrada |
+| Ação | Tecla |
 | --- | --- |
-| Alternar entre foco (calmo) e pausa (dormindo) | `B` |
-| Fazer o slime comemorar | `Espaço` |
+| Iniciar ou pausar o relógio | `Espaço` |
+| Resetar a fase atual | `R` |
+| Pular para a próxima fase (não conta como ciclo) | `S` |
 | Fechar | botão X da janela |
+
+Quando um foco termina, o relógio troca para a pausa e fica parado até você apertar `Espaço`.
 
 ---
 
@@ -227,12 +242,15 @@ Todos em `src/Tamagotchi_Pomodoro/config.py`:
 | `BREAK_MINUTES` | `5` | duração da pausa (min) |
 | `WINDOW_WIDTH` / `WINDOW_HEIGHT` | `480` / `360` | tamanho da janela (px) |
 | `FPS` | `60` | quadros por segundo |
-| `SPRITE_SCALE` | `8` | fator de ampliação da pixel art |
+| `SPRITE_SCALE` | `6` | fator de ampliação da pixel art |
 | `HAPPY_SECONDS` | `3` | duração da comemoração (s) |
 | `FRAME_SECONDS` | `0.5` | tempo de cada frame da animação (s) |
 | `FRAMES_PER_MOOD` | `2` | frames por humor |
-| `BACKGROUND_COLOR` | `10, 26, 47` | cor de fundo da janela (RGB) |
-| `TEXT_COLOR` | `230, 230, 240` | cor do texto (RGB) |
+| `TIME_FONT_SIZE` | `72` | tamanho da fonte do tempo |
+| `INFO_FONT_SIZE` | `28` | tamanho da fonte da fase e dos ciclos |
+| `HINT_FONT_SIZE` | `20` | tamanho da fonte da ajuda de teclas |
+| `BACKGROUND_COLOR` | — | cor de fundo da janela (RGB) |
+| `TEXT_COLOR` | — | cor do texto (RGB) |
 
 Dica: durante o desenvolvimento, use `FOCUS_MINUTES = 1` para ver o fluxo completo sem esperar 25 minutos.
 
@@ -253,7 +271,8 @@ Tamagotchi_Pomodoro/
 │       ├── config.py          # constantes
 │       ├── timer.py           # lógica do relógio (sem Pygame)
 │       ├── character.py       # lógica do personagem (sem Pygame)
-│       └── assets.py          # carregamento dos sprites
+│       ├── assets.py          # carregamento dos sprites
+│       └── ui.py              # desenho da tela
 ├── tests/
 │   ├── test_timer.py
 │   └── test_character.py
@@ -277,7 +296,7 @@ Rode na **raiz** do projeto, com o venv ativo. O `pytest.ini` aponta o `pythonpa
 - `test_timer.py` cobre o estado inicial, a contagem (parado e rodando), o fim do foco, `skip`, `reset`, `toggle` e a formatação do tempo.
 - `test_character.py` cobre o humor em cada fase, a comemoração e seu fim, e a alternância dos frames.
 
-Os testes não abrem janela nem dependem do Pygame, e usam valores do `config`, então continuam válidos se as durações mudarem.
+A lógica (`timer.py` e `character.py`) é testada sem abrir janela e sem depender do Pygame, e usam valores do `config`, então continuam válidos se as durações mudarem.
 
 ---
 
@@ -288,18 +307,19 @@ Os testes não abrem janela nem dependem do Pygame, e usam valores do `config`, 
 - **`update` devolve a fase que terminou:** a interface reage ao evento (por exemplo, chamando `celebrate()`), sem que o timer precise conhecer o personagem.
 - **`Enum` para fases e humores:** evita erros de digitação com textos soltos.
 - **Constantes centralizadas em `config.py`:** mudar uma duração ou cor é editar um único lugar.
-- **Sprites em arquivos PNG:** pixel art real, carregada uma vez e ampliada sem borrar.
+- **Interface só lê o estado:** `ui.py` desenha a partir do `timer`, sem alterar nada. Quem decide é a lógica.
+- **Sprites em arquivos PNG com fundo transparente:** pixel art real, carregada uma vez e ampliada sem borrar, e que fica bem sobre qualquer cor de fundo.
 - **`src` layout:** o código fica em `src/`, separado de testes, assets e documentação.
 
 ---
 
 ## Possíveis extensões
 
-- Ligar timer e personagem na interface, com botões e atalhos.
+- Botões clicáveis com o mouse.
 - Barra de energia que cai durante o foco, fazendo o slime ficar cansado até dormir.
 - Pausa longa a cada 4 ciclos.
 - Sons no fim de cada fase e na comemoração.
-- Fundo transparente nos sprites e janela sempre no topo (overlay no Windows).
+- Janela sempre no topo, com fundo transparente (overlay no Windows).
 - Salvar ciclos e estatísticas entre sessões.
 - Configurar as durações dentro do app.
 - Empacotar como executável (PyInstaller).
