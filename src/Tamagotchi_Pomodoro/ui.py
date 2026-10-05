@@ -2,6 +2,7 @@ import pygame
 
 from . import config
 from .timer import Phase
+from .character import energy_level
 
 PHASE_LABELS = {
     Phase.FOCUS: "FOCO",
@@ -70,6 +71,31 @@ class Interface:
         screen.blit(surface, rect)
 
 
+    def draw_energy_bar(self, screen, energy):
+        x = (config.WINDOW_WIDTH - config.ENERGY_BAR_WIDTH) // 2
+        y = config.ENERGY_BAR_Y
+        middle_Y = y + config.ENERGY_BAR_HEIGHT // 2
+
+        background = pygame.Rect(x, y, config.ENERGY_BAR_WIDTH, config.ENERGY_BAR_HEIGHT)
+        pygame.draw.rect(screen, config.ENERGY_BG_COLOR, background, border_radius=6)
+
+        if energy > config.ENERGY_MEDIUM:
+            color = config.ENERGY_HIGH_COLOR
+        elif energy > config.ENERGY_LOW:
+            color = config.ENERGY_MID_COLOR
+        else:
+            color = config.ENERGY_LOW_COLOR
+
+        fill_width = int(config.ENERGY_BAR_WIDTH * energy)
+        if fill_width > 0:
+            fill = pygame.Rect(x, y, fill_width, config.ENERGY_BAR_HEIGHT)
+            pygame.draw.rect(screen, color, fill, border_radius=6)
+
+        self.draw_text(screen, "Energia", self.info_font, (x - 45, middle_Y))
+        percent = f"{round(energy*100)}%"
+        self.draw_text(screen, percent, self.info_font, (x + config.ENERGY_BAR_WIDTH + 35, middle_Y))
+
+
     def draw(self, screen, timer, sprite, muted):
         screen.fill(config.BACKGROUND_COLOR)
         center_x = config.WINDOW_WIDTH // 2
@@ -79,7 +105,10 @@ class Interface:
         sound_text = "som: desligado" if muted else "som: ligado"
         self.draw_text(screen, sound_text, self.info_font, (config.WINDOW_WIDTH - 95, 28))
 
-        sprite_rect = sprite.get_rect(center=(center_x, 150))
+        energy = energy_level(timer.phase, timer.progress())
+        self.draw_energy_bar(screen, energy)
+        
+        sprite_rect = sprite.get_rect(center=(center_x, 165))
         screen.blit(sprite, sprite_rect)
 
         self.draw_text(screen, timer.formatted_time(), self.time_font, (center_x, 262))

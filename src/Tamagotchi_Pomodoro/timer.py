@@ -69,6 +69,12 @@ class PomodoroTimer:
         self.running = False
 
 
+    def progress(self):
+        total = self._duration_of(self.phase)
+        elapsed = total - self.remaining
+        return min(1.0, max(0.0, elapsed / total))
+
+
     def formatted_time(self):
         total_seconds = max(0, math.ceil(self.remaining))
         minutes, seconds = divmod(total_seconds, 60)

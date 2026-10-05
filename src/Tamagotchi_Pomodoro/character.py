@@ -9,6 +9,12 @@ class Mood(Enum):
     SLEEPING = auto()
     HAPPY = auto()
 
+
+def energy_level(phase, progress):
+    if phase == Phase.FOCUS:
+        return 1 - progress
+    return progress
+
 class Character:
     def __init__(self):
         self.mood = Mood.CALM

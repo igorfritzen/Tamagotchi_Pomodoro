@@ -1,5 +1,6 @@
 from Tamagotchi_Pomodoro import config
 from Tamagotchi_Pomodoro.timer import Phase, PomodoroTimer
+from pytest import approx
 
 
 def test_start_in_focus_and_paused():
@@ -67,3 +68,29 @@ def test_toggle_inverts_running_state():
     assert timer.running is True
     timer.toggle()
     assert timer.running is False
+
+
+def test_progress_is_zero_at_start_of_phase():
+    timer = PomodoroTimer()
+    assert timer.progress() == 0
+
+
+def test_progress_is_half_after_half_of_the_phase():
+    timer = PomodoroTimer()
+    timer.start()
+    timer.update(config.FOCUS_MINUTES * 60 / 2)
+    assert timer.progress() == approx(0.5)
+
+
+def test_progress_never_exceeds_one():
+    timer = PomodoroTimer()
+    timer.remaining = -10
+    assert timer.progress() == 1
+
+
+def test_progress_restarts_in_the_next_phase():
+    timer = PomodoroTimer()
+    timer.start()
+    timer.update(config.FOCUS_MINUTES * 60)
+    assert timer.phase == Phase.BREAK
+    assert timer.progress() == 0
