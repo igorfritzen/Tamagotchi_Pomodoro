@@ -6,6 +6,21 @@ from .character import Character
 from .timer import Phase, PomodoroTimer
 from .ui import Interface
 
+KEY_ACTIONS = {
+    pygame.K_SPACE: "toggle",
+    pygame.K_r: "reset",
+    pygame.K_s: "skip",
+}
+
+
+def apply_action(timer, action):
+    if action == "toggle":
+        timer.toggle()
+    elif action == "reset":
+        timer.reset()
+    elif action == "skip":
+        timer.skip()
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
@@ -25,12 +40,9 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    timer.toggle()
-                elif event.key == pygame.K_r:
-                    timer.reset()
-                elif event.key == pygame.K_s:
-                    timer.skip()
+                apply_action(timer, KEY_ACTIONS.get(event.key))
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                apply_action(timer, ui.get_actions(event))
 
         finished = timer.update(dt)
         if finished == Phase.FOCUS:
