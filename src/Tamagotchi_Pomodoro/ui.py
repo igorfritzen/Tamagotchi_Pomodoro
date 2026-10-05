@@ -70,11 +70,14 @@ class Interface:
         screen.blit(surface, rect)
 
 
-    def draw(self, screen, timer, sprite):
+    def draw(self, screen, timer, sprite, muted):
         screen.fill(config.BACKGROUND_COLOR)
         center_x = config.WINDOW_WIDTH // 2
 
         self.draw_text(screen, PHASE_LABELS[timer.phase], self.info_font, (center_x, 28))
+
+        sound_text = "som: desligado" if muted else "som: ligado"
+        self.draw_text(screen, sound_text, self.info_font, (config.WINDOW_WIDTH - 95, 28))
 
         sprite_rect = sprite.get_rect(center=(center_x, 150))
         screen.blit(sprite, sprite_rect)
