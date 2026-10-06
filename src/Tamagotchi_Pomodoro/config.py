@@ -1,9 +1,15 @@
+import sys
 from pathlib import Path
 
+
 #Pastas
-BASE_DIR = Path(__file__).resolve().parents[2]
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys._MEIPASS)
+else:
+    BASE_DIR = Path(__file__).resolve().parents[2]
 SPRITES_DIR = BASE_DIR / "assets" / "sprites"
 SOUND_DIR = BASE_DIR / "assets" / "sounds"
+ICON_PATH = BASE_DIR / "assets" / "icon.png"
 
 #Tempo em minutos
 FOCUS_MINUTES = 25

@@ -1,8 +1,26 @@
+# Ambiente virtual
 .venv/
-__pycache__/ 
+
+# Python
+__pycache__/
 *.pyc
 .pytest_cache/
 
-
+# Editor
 .vscode/
 .idea/
+
+# Build e empacotamento
+build/
+dist/
+*.spec
+installer_output/
+
+# Executáveis e pacotes gerados (vão como anexo da Release)
+*.exe
+*.zip
+
+# Sistema operacional / OneDrive
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -14,6 +14,7 @@ KEY_ACTIONS = {
     pygame.K_m: "mute",
     pygame.K_t: "pin",
     pygame.K_ESCAPE: "quit",
+    pygame.K_x: "quit",
 }
 
 
@@ -28,6 +29,7 @@ def apply_action(timer, action):
 def main():
     pygame.init()
     flags = pygame.NOFRAME if config.WINDOW_BORDERLESS else 0
+    pygame.display.set_icon(pygame.image.load(config.ICON_PATH))
     screen = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT), flags)
     pygame.display.set_caption(config.WINDOW_TITLE)
     clock = pygame.time.Clock()
