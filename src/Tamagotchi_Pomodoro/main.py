@@ -5,12 +5,14 @@ from .assets import load_sprites, load_sounds
 from .character import Character
 from .timer import Phase, PomodoroTimer
 from .ui import Interface
+from . import config, overlay
 
 KEY_ACTIONS = {
     pygame.K_SPACE: "toggle",
     pygame.K_r: "reset",
     pygame.K_s: "skip",
     pygame.K_m: "mute",
+    pygame.K_t: "pin",
 }
 
 
@@ -34,6 +36,7 @@ def main():
     character = Character()
     ui = Interface()
     muted = False
+    pinned = False
 
     running = True
     while running:
@@ -47,6 +50,10 @@ def main():
                 action = KEY_ACTIONS.get(event.key)
                 if action == "mute":
                     muted = not muted
+                elif action == "pin":
+                    wanted = not pinned
+                    if overlay.set_always_on_top(wanted):
+                        pinned = wanted
                 else:
                     apply_action(timer, action)
             elif event.type == pygame.MOUSEBUTTONDOWN:
