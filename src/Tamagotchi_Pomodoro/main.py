@@ -13,6 +13,7 @@ KEY_ACTIONS = {
     pygame.K_s: "skip",
     pygame.K_m: "mute",
     pygame.K_t: "pin",
+    pygame.K_ESCAPE: "quit",
 }
 
 
@@ -26,7 +27,8 @@ def apply_action(timer, action):
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
+    flags = pygame.NOFRAME if config.WINDOW_BORDERLESS else 0
+    screen = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT), flags)
     pygame.display.set_caption(config.WINDOW_TITLE)
     clock = pygame.time.Clock()
 
@@ -54,10 +56,19 @@ def main():
                     wanted = not pinned
                     if overlay.set_always_on_top(wanted):
                         pinned = wanted
+                elif action == "quit":
+                    running = False
                 else:
                     apply_action(timer, action)
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                apply_action(timer, ui.get_actions(event))
+                action = ui.get_actions(event)
+                if action == "quit":
+                    running = False
+                elif action is None:
+                    if event.button == 1 and config.WINDOW_BORDERLESS:
+                        overlay.start_drag()
+                else:
+                    apply_action(timer, action)
 
         finished = timer.update(dt)
         if finished == Phase.FOCUS:

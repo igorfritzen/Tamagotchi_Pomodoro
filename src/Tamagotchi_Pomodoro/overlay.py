@@ -8,6 +8,8 @@ HWND_TOPMOST = -1
 HWND_NOTOPMOST = -2
 SWP_NOSIZE = 0x0001
 SWP_NOMOVE = 0x0002
+WM_NCLBUTTONDOWN = 0x00A1
+HTCAPTION = 2
 
 def is_supported():
     return sys.platform == "win32"
@@ -34,3 +36,23 @@ def set_always_on_top(enabled):
 
     result = set_window_pos(hwnd, insert_after, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
     return bool(result)
+
+
+def start_drag():
+    if not is_supported():
+        return 
+
+    hwnd = pygame.display.get_wm_info()["window"]
+    user32 = ctypes.windll.user32
+
+    send_message = user32.SendMessageW
+    send_message.argtypes = [
+        wintypes.HWND,
+        wintypes.UINT,
+        wintypes.WPARAM,
+        wintypes.LPARAM,        
+    ]
+    send_message.restype = wintypes.LPARAM
+
+    user32.ReleaseCapture()
+    send_message(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, 0)

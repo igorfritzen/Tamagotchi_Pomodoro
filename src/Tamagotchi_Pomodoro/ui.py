@@ -55,6 +55,11 @@ class Interface:
             rect = (x, config.BUTTON_Y, config.BUTTON_WIDTH, config.BUTTON_HEIGHT)
             buttons[action] = Button(label, rect)
             x +=config.BUTTON_WIDTH + config.BUTTON_GAP
+
+        if config.WINDOW_BORDERLESS:
+            close_rect = (config.WINDOW_WIDTH - 34, 6, 28, 28)
+            buttons["quit"] = Button("X", close_rect)
+
         return buttons
 
 
@@ -123,3 +128,5 @@ class Interface:
             self.buttons["toggle"].label = "Iniciar"
         for button in self.buttons.values():
             button.draw(screen, self.info_font)
+            if config.WINDOW_BORDERLESS:
+                pygame.draw.rect(screen, config.BUTTON_COLOR, screen.get_rect(), width=2)
